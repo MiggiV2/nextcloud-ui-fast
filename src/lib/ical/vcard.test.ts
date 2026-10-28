@@ -35,6 +35,30 @@ describe('parseVCard', () => {
   });
 });
 
+describe('CRLF vCards from Sabre', () => {
+  it('decodes the &#13; character references Sabre emits for CRLF line endings', () => {
+    // given
+    const xml = `<?xml version="1.0"?><d:multistatus xmlns:d="DAV:" xmlns:card="urn:ietf:params:xml:ns:carddav"><d:response><d:href>/remote.php/dav/addressbooks/users/demo/importv2-1/a.vcf</d:href><d:propstat><d:prop><d:getetag>&quot;e&quot;</d:getetag><card:address-data>BEGIN:VCARD&#13;
+VERSION:3.0&#13;
+UID:a&#13;
+FN:Erika Mustermann&#13;
+EMAIL;TYPE=HOME:erika@example.org&#13;
+NOTE:Zeile\\, eins&#13;
+END:VCARD&#13;
+</card:address-data></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response></d:multistatus>`;
+
+    // when
+    const [card] = parseObjects(xml);
+    const contact = parseVCard(card.data);
+
+    // then
+    expect(card.data).not.toContain('&#13;');
+    expect(contact.fullName).toBe('Erika Mustermann');
+    expect(contact.emails).toEqual([{ type: 'home', value: 'erika@example.org' }]);
+    expect(contact.note).toBe('Zeile, eins');
+  });
+});
+
 describe('updateVCard', () => {
   it('replaces edited fields and keeps unknown properties', () => {
     // when

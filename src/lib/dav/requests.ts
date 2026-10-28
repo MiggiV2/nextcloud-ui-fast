@@ -22,6 +22,9 @@ export const ADDRESSBOOKS_PROPFIND = `<?xml version="1.0"?>
  <d:prop><d:resourcetype/><d:displayname/><cs:getctag/><d:sync-token/><oc:read-only/></d:prop>
 </d:propfind>`;
 
+export const ETAG_PROPFIND = `<?xml version="1.0"?>
+<d:propfind xmlns:d="DAV:"><d:prop><d:getetag/></d:prop></d:propfind>`;
+
 export function syncCollection(token: string | null): string {
   return `<?xml version="1.0"?>
 <d:sync-collection xmlns:d="DAV:"><d:sync-token>${escapeXml(token ?? '')}</d:sync-token><d:sync-level>1</d:sync-level>

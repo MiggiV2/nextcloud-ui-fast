@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { fixture } from '../../../test/fixtures';
 import { db } from '../db';
 import { DavHttpError } from '../dav/client';
-import { syncCalendar, syncSubscription, type CalendarDav } from './calendar';
+import { syncCalendar, syncCollectionObjects, syncSubscription, type CalendarDav } from './calendar';
 import type { Calendar } from '../dav/parsers';
 
 const calendar: Calendar = {
@@ -15,8 +15,9 @@ const calendar: Calendar = {
   subscribed: false,
 };
 
-function fakeDav(reports: Array<string | DavHttpError>) {
+function fakeDav(reports: Array<string | DavHttpError>, listing = '', objects: Record<string, string> = {}) {
   const bodies: string[] = [];
+  const gets: string[] = [];
   const dav: CalendarDav = {
     async report(_href, body) {
       bodies.push(body);
@@ -25,8 +26,15 @@ function fakeDav(reports: Array<string | DavHttpError>) {
       if (next === undefined) throw new Error('unexpected report');
       return next;
     },
+    async propfind() {
+      return listing;
+    },
+    async getText(href) {
+      gets.push(href);
+      return { text: objects[href], etag: 'fetched' };
+    },
   };
-  return { dav, bodies };
+  return { dav, bodies, gets };
 }
 
 describe('syncCalendar', () => {
@@ -128,5 +136,26 @@ describe('syncCalendar', () => {
 
     // then
     expect(await db.objects.where('collection').equals(uni.href).count()).toBe(0);
+  });
+
+  it('falls back to an etag listing plus GET when the collection does not support REPORT (415)', async () => {
+    // given
+    const book = '/remote.php/dav/addressbooks/users/demo/z-app-generated--contactsinteraction--recent/';
+    const listing = `<?xml version="1.0"?><d:multistatus xmlns:d="DAV:">
+      <d:response><d:href>${book}</d:href><d:propstat><d:prop><d:getetag/></d:prop><d:status>HTTP/1.1 404 Not Found</d:status></d:propstat><d:propstat><d:prop><d:resourcetype><d:collection/></d:resourcetype></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response>
+      <d:response><d:href>${book}1.vcf</d:href><d:propstat><d:prop><d:getetag>&quot;e1&quot;</d:getetag></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response>
+      </d:multistatus>`;
+    const { dav, gets } = fakeDav([new DavHttpError(415, 'REPORT', book, 'not supported')], listing, {
+      [`${book}1.vcf`]: 'BEGIN:VCARD\nVERSION:3.0\nFN:A\nEND:VCARD',
+    });
+
+    // when
+    await syncCollectionObjects(dav, { href: book }, 'addressbook');
+
+    // then
+    expect(gets).toEqual([`${book}1.vcf`]);
+    expect(await db.objects.where('collection').equals(book).toArray()).toEqual([
+      { href: `${book}1.vcf`, collection: book, etag: 'e1', data: 'BEGIN:VCARD\nVERSION:3.0\nFN:A\nEND:VCARD' },
+    ]);
   });
 });

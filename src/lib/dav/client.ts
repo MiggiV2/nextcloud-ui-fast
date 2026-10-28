@@ -77,6 +77,12 @@ export class DavClient {
     return this.request('GET', href);
   }
 
+  async getText(href: string): Promise<{ text: string; etag: string }> {
+    const response = await this.request('GET', href);
+    const etag = response.headers.get('ETag') ?? response.headers.get('OC-ETag') ?? '';
+    return { text: await response.text(), etag: etag.replace(/^W\//, '').replace(/"/g, '') };
+  }
+
   async put(href: string, body: BodyInit, contentType: string, etag: string | null): Promise<string | null> {
     const headers: Record<string, string> = {
       'Content-Type':

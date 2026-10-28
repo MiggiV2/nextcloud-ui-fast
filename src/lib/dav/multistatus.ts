@@ -18,6 +18,7 @@ const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@',
   parseTagValue: false,
+  htmlEntities: true,
   parseAttributeValue: false,
   trimValues: true,
   isArray: (name) => ['response', 'propstat', 'comp', 'href'].includes(name),

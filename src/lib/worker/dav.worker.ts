@@ -31,6 +31,13 @@ async function discover(): Promise<Principal> {
 
 const me = () => (principal ??= discover().catch((e) => ((principal = null), Promise.reject(e))));
 
+async function settleAll(tasks: Promise<unknown>[]) {
+  const results = await Promise.allSettled(tasks);
+  const failed = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+  failed.forEach((f) => console.warn('collection sync failed', f.reason));
+  if (failed.length && failed.length === results.length) throw failed[0].reason;
+}
+
 async function forgetFolder(href: string) {
   const nested = await db.folders.where('href').startsWith(href).primaryKeys();
   await db.folders.bulkDelete(nested);
@@ -101,7 +108,7 @@ const api: WorkerApi = {
         syncToken: prev?.syncToken,
       });
     }
-    await Promise.all(calendars.map((c) => (c.subscribed ? syncSubscription(client, c) : syncCalendar(client, c))));
+    await settleAll(calendars.map((c) => (c.subscribed ? syncSubscription(client, c) : syncCalendar(client, c))));
   },
 
   async syncAddressbooks() {
@@ -118,7 +125,7 @@ const api: WorkerApi = {
         syncToken: prev?.syncToken,
       });
     }
-    await Promise.all(books.map((b) => syncCollectionObjects(client, { href: b.href }, 'addressbook')));
+    await settleAll(books.map((b) => syncCollectionObjects(client, { href: b.href }, 'addressbook')));
   },
 
   async expand(collections, start, end) {

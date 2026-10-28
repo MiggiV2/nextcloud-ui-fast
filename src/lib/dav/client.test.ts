@@ -54,6 +54,19 @@ describe('DavClient', () => {
     expect(calls[1].headers.get('Content-Type')).toBe('text/calendar; charset=utf-8');
   });
 
+  it('reads text together with its etag', async () => {
+    // given
+    const { fn, calls } = fakeFetch([token(), new Response('# Notiz', { status: 200, headers: { ETag: '"abc"' } })]);
+    const client = new DavClient({ fetch: fn });
+
+    // when
+    const doc = await client.getText('/remote.php/dav/files/demo/Notes/Home.md');
+
+    // then
+    expect(doc).toEqual({ text: '# Notiz', etag: 'abc' });
+    expect(calls[1].method).toBe('GET');
+  });
+
   it('uses If-None-Match for creates', async () => {
     // given
     const { fn, calls } = fakeFetch([token(), new Response(null, { status: 201 })]);
