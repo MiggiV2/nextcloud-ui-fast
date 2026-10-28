@@ -42,6 +42,7 @@ export class DavClient {
   }
 
   async request(method: string, href: string, init: { body?: BodyInit; headers?: Record<string, string> } = {}) {
+    if (!href) throw new Error(`${method} without href`);
     for (let attempt = 0; ; attempt++) {
       const headers = new Headers(init.headers);
       headers.set('requesttoken', await this.fetchToken());

@@ -1,8 +1,9 @@
 /// <reference lib="webworker" />
 import { db, getMeta, setMeta, type ObjectRow } from '../db';
 import { DavClient, DavHttpError } from '../dav/client';
-import { parseAddressbooks, parseCalendars, parsePrincipal, type Principal } from '../dav/parsers';
-import { ADDRESSBOOKS_PROPFIND, CALENDARS_PROPFIND, PRINCIPAL_PROPFIND } from '../dav/requests';
+import { parseAddressbooks, parseCalendars, type Principal } from '../dav/parsers';
+import { ADDRESSBOOKS_PROPFIND, CALENDARS_PROPFIND } from '../dav/requests';
+import { discoverPrincipal, isComplete } from '../sync/principal';
 import { buildEventIcs, expandEvents, updateEventIcs } from '../ical/events';
 import { buildVCard, parseVCard, updateVCard } from '../ical/vcard';
 import { syncCalendar, syncCollectionObjects, syncSubscription } from '../sync/calendar';
@@ -17,14 +18,11 @@ const post = (reply: Reply) => (self as unknown as DedicatedWorkerGlobalScope).p
 
 async function discover(): Promise<Principal> {
   const cached = await getMeta<Principal>('principal');
-  const fresh = client
-    .propfind('/remote.php/dav/', PRINCIPAL_PROPFIND, 0)
-    .then(parsePrincipal)
-    .then(async (p) => {
-      await setMeta('principal', p);
-      return p;
-    });
-  if (cached) {
+  const fresh = discoverPrincipal(client).then(async (p) => {
+    await setMeta('principal', p);
+    return p;
+  });
+  if (cached && isComplete(cached)) {
     fresh.catch(() => {});
     return cached;
   }

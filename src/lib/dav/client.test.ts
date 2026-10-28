@@ -95,6 +95,19 @@ describe('DavClient', () => {
     );
   });
 
+  it('refuses an empty href, which a worker would resolve to its own script URL', async () => {
+    // given
+    const { fn, calls } = fakeFetch([]);
+    const client = new DavClient({ fetch: fn });
+
+    // when
+    const error = await client.propfind('', '<p/>', 1).catch((e) => e);
+
+    // then
+    expect(error).toBeInstanceOf(Error);
+    expect(calls).toHaveLength(0);
+  });
+
   it('throws DavHttpError with status on failure', async () => {
     // given
     const { fn } = fakeFetch([token(), new Response('nope', { status: 412 })]);
