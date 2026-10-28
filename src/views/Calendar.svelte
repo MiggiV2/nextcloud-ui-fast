@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { api } from '../lib/api';
   import { addDays, layoutDay, monthGrid, shiftDate, startOfDay, visibleRange, weekDays } from '../lib/calendar-grid';
+  import { saveCalendarMode, type CalendarMode } from '../lib/calendar-mode';
   import { db, type CollectionRow } from '../lib/db';
   import { formatTime } from '../lib/format';
   import { live } from '../lib/live.svelte';
@@ -50,6 +51,11 @@
     } catch {
       /* storage unavailable */
     }
+  }
+
+  function switchMode(next: CalendarMode) {
+    saveCalendarMode(next);
+    location.hash = calendarHash(current, next);
   }
 
   function expand(anchor: Date, hrefs: string[]) {
@@ -155,12 +161,8 @@
     <strong>{title}</strong>
     <span class="spacer"></span>
     {#if syncError}<span class="error">{syncError}</span>{/if}
-    <button class:primary={mode === 'month'} onclick={() => (location.hash = calendarHash(current, 'month'))}
-      >Monat</button
-    >
-    <button class:primary={mode === 'week'} onclick={() => (location.hash = calendarHash(current, 'week'))}
-      >Woche</button
-    >
+    <button class:primary={mode === 'month'} onclick={() => switchMode('month')}>Monat</button>
+    <button class:primary={mode === 'week'} onclick={() => switchMode('week')}>Woche</button>
     <button onclick={() => create(new Date(Math.ceil(Date.now() / 3_600_000) * 3_600_000), false)}>+ Termin</button>
   </div>
 

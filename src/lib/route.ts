@@ -13,11 +13,11 @@ export function parseIsoDate(s: string) {
   return new Date(y, m - 1, d);
 }
 
-export function parseHash(hash: string): Route {
+export function parseHash(hash: string, defaultMode: 'month' | 'week' = 'month'): Route {
   const [view, ...rest] = hash.replace(/^#\/?/, '').split('/');
   if (view === 'calendar') {
     const [date, mode] = rest;
-    return { view, date: date || isoDate(new Date()), mode: mode === 'week' ? 'week' : 'month' };
+    return { view, date: date || isoDate(new Date()), mode: mode === 'week' || mode === 'month' ? mode : defaultMode };
   }
   if (view === 'edit') return { view, path: decodePath(rest) };
   if (view === 'contacts') return rest.length ? { view, href: decodeURIComponent(rest.join('/')) } : { view };

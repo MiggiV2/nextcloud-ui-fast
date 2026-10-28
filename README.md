@@ -16,7 +16,7 @@ The frontend does not make Nextcloud faster. It feels fast because every view re
 | Area     | Features                                                                                                                                   |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | Files    | browse, upload (chunked v2 for files > 10 MB, drag & drop), download, rename, move, delete, new folder, previews                           |
-| Calendar | month and week view, create/edit/delete events; recurring events are display-only                                                          |
+| Calendar | month and week view (the last chosen view is remembered), create/edit/delete events; recurring events are display-only                     |
 | Contacts | list, search, detail, create/edit/delete                                                                                                   |
 | Notes    | Markdown/text editor with edit, split and preview modes, Ctrl+S, conflict detection via `If-Match`, relative images from the note's folder |
 

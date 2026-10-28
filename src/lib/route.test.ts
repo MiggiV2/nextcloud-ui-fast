@@ -32,6 +32,11 @@ describe('parseHash', () => {
     expect(parseHash('#/calendar/2026-11-04')).toMatchObject({ mode: 'month' });
   });
 
+  it('uses the given default mode when the hash has none', () => {
+    expect(parseHash('#/calendar', 'week')).toMatchObject({ view: 'calendar', mode: 'week' });
+    expect(parseHash('#/calendar/2026-11-04/month', 'week')).toMatchObject({ mode: 'month' });
+  });
+
   it('defaults calendar date to today', () => {
     expect(parseHash('#/calendar')).toMatchObject({ view: 'calendar', date: isoDate(new Date()) });
   });
