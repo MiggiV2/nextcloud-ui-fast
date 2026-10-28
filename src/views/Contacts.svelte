@@ -8,6 +8,7 @@
   import type { ContactEntry } from '../lib/worker/protocol';
   import VirtualList from '../components/VirtualList.svelte';
   import ContactForm from '../components/ContactForm.svelte';
+  import Icon from '../components/Icon.svelte';
 
   let { selected }: { selected?: string } = $props();
 
@@ -50,6 +51,8 @@
   const writableBook = $derived(books.current.find((b) => !b.readOnly));
   const readOnly = $derived(!!books.current.find((b) => b.href === current?.collection)?.readOnly);
 
+  const hue = (name: string) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 360, 7);
+
   const empty: ContactEdit = { fullName: '', org: '', note: '', emails: [], phones: [] };
 
   function save(edit: ContactEdit) {
@@ -68,7 +71,7 @@
 </script>
 
 <section class="contacts">
-  <div class="list">
+  <div class="list card">
     <div class="toolbar">
       <input type="search" placeholder="Suchen…" bind:value={query} />
       {#if writableBook}<button onclick={() => (editing = 'new')}>+</button>{/if}
@@ -77,7 +80,7 @@
       <VirtualList items={filtered} rowHeight={48} key={(c) => c.href}>
         {#snippet row(c: ContactEntry)}
           <a class="entry" class:active={c.href === selected} href={contactHash(c.href)}>
-            <span class="avatar">{(c.fullName || '?').slice(0, 1).toUpperCase()}</span>
+            <span class="avatar" style:--hue={hue(c.fullName)}>{(c.fullName || '?').slice(0, 1).toUpperCase()}</span>
             <span class="text">
               <span>{c.fullName || '(ohne Namen)'}</span>
               <span class="muted small">{c.emails[0]?.value ?? c.org}</span>
@@ -88,7 +91,7 @@
     </div>
   </div>
 
-  <div class="detail">
+  <div class="detail card">
     {#if error}<p class="error">{error} <button onclick={() => (error = '')}>×</button></p>{/if}
     {#if editing === 'new'}
       <h2>Neuer Kontakt</h2>
@@ -116,7 +119,11 @@
       </dl>
       {#if current.note}<p class="note">{current.note}</p>{/if}
     {:else}
-      <p class="muted">{contacts.length} Kontakte</p>
+      <div class="empty">
+        <span class="empty-icon"><Icon name="users" size={28} /></span>
+        <strong>{contacts.length} Kontakte</strong>
+        <span class="muted">Wähle links einen Kontakt aus oder lege einen neuen an.</span>
+      </div>
     {/if}
   </div>
 </section>
@@ -124,15 +131,17 @@
 <style>
   .contacts {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 340px 1fr;
+    gap: 16px;
     height: 100%;
+    padding: 20px;
   }
 
   .list {
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--border);
     min-height: 0;
+    overflow: hidden;
   }
 
   .list input {
@@ -168,8 +177,9 @@
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: var(--accent);
-    color: var(--accent-fg);
+    background: hsl(var(--hue) 55% 52%);
+    color: #fff;
+    font-weight: 600;
     flex-shrink: 0;
   }
 
@@ -219,12 +229,35 @@
     white-space: pre-wrap;
   }
 
+  .empty {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    margin-bottom: 6px;
+  }
+
   .error {
     color: var(--danger);
   }
 
   @media (max-width: 760px) {
     .contacts {
+      padding: 12px;
+      gap: 12px;
       grid-template-columns: 1fr;
       grid-template-rows: 45% 1fr;
     }

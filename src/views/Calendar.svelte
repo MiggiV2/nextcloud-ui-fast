@@ -180,7 +180,7 @@
     </aside>
 
     {#if mode === 'month'}
-      <div class="month">
+      <div class="month card">
         {#each ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] as name (name)}<div class="head">{name}</div>{/each}
         {#each days as day (day.getTime())}
           {@const list = onDay(day)}
@@ -205,7 +205,7 @@
         {/each}
       </div>
     {:else}
-      <div class="week">
+      <div class="week card">
         <div class="week-head">
           <div></div>
           {#each days as day (day.getTime())}
@@ -267,16 +267,46 @@
     height: 100%;
   }
 
+  .calendar > .toolbar {
+    padding: 18px 20px 14px;
+  }
+
+  .calendar > .toolbar strong {
+    font-size: 20px;
+    font-weight: 600;
+    margin-left: 6px;
+    text-transform: capitalize;
+  }
+
+  aside label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+
+  aside label:hover {
+    background: var(--hover);
+  }
+
   .body {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: 180px 1fr;
+    grid-template-columns: 190px 1fr;
+    gap: 16px;
+    padding: 0 20px 20px;
+  }
+
+  .month,
+  .week {
+    overflow: hidden;
   }
 
   aside {
-    padding: 12px;
-    border-right: 1px solid var(--border);
+    padding: 4px 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -318,7 +348,11 @@
   }
 
   .cell.other {
-    background: var(--bg-alt);
+    background: color-mix(in srgb, var(--bg) 60%, var(--surface));
+  }
+
+  .cell.other .daynum {
+    color: var(--faint);
   }
 
   .daynum {
@@ -341,7 +375,7 @@
     padding: 1px 4px;
     border-radius: 4px;
     border-left: 3px solid var(--c);
-    background: color-mix(in srgb, var(--c) 15%, transparent);
+    background: color-mix(in srgb, var(--c) 28%, transparent);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -406,7 +440,7 @@
     padding: 2px 4px;
     border-radius: 4px;
     border-left: 3px solid var(--c);
-    background: color-mix(in srgb, var(--c) 22%, var(--bg));
+    background: color-mix(in srgb, var(--c) 38%, var(--surface));
     overflow: hidden;
     box-sizing: border-box;
   }
@@ -414,6 +448,7 @@
   @media (max-width: 760px) {
     .body {
       grid-template-columns: 1fr;
+      padding: 0 8px 8px;
     }
 
     aside {

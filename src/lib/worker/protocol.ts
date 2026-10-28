@@ -1,6 +1,7 @@
 import type { Occurrence, EventFields } from '../ical/events';
 import type { Contact, ContactEdit } from '../ical/vcard';
 import type { Principal } from '../dav/parsers';
+import type { DocumentRow } from '../db';
 
 export interface ContactEntry extends Contact {
   href: string;
@@ -28,6 +29,9 @@ export interface WorkerApi {
   deleteEvent(href: string): Promise<void>;
   saveContact(collection: string, href: string | null, edit: ContactEdit): Promise<void>;
   deleteContact(href: string): Promise<void>;
+  openDocument(href: string, force?: boolean): Promise<DocumentRow>;
+  saveDocument(href: string, text: string, etag: string): Promise<DocumentRow>;
+  createDocument(href: string, text: string): Promise<void>;
 }
 
 export type Request = { id: number; method: keyof WorkerApi; args: unknown[] };

@@ -1,34 +1,69 @@
 :root {
-  --bg: #ffffff;
-  --bg-alt: #f4f5f7;
-  --fg: #1d2129;
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --sidebar: #ffffff;
+  --fg: #1a1d23;
   --muted: #6b7280;
-  --border: #e3e5e8;
-  --accent: #0082c9;
+  --faint: #9aa1ab;
+  --border: #e4e7ec;
+  --hover: #f2f4f7;
+  --accent: #2f6fed;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
   --accent-fg: #ffffff;
-  --danger: #c62828;
-  --hover: #eef3f8;
-  --radius: 6px;
+  --danger: #d03b3b;
+  --success: #1f9d61;
+  --warning: #c27a12;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.05), 0 1px 3px rgb(16 24 40 / 0.06);
+  --shadow-lg: 0 12px 32px rgb(16 24 40 / 0.18);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --mono: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --kind-folder: #e0a526;
+  --kind-markdown: #2f6fed;
+  --kind-text: #64748b;
+  --kind-image: #d946a8;
+  --kind-pdf: #e5484d;
+  --kind-video: #8b5cf6;
+  --kind-audio: #0ea5a4;
+  --kind-archive: #a16207;
+  --kind-code: #0f9d58;
+  --kind-sheet: #16a34a;
+  --kind-doc: #2563eb;
+  --kind-file: #7c8594;
   font-family:
+    Inter,
     system-ui,
     -apple-system,
     'Segoe UI',
     Roboto,
     sans-serif;
   font-size: 14px;
+  line-height: 1.45;
   color: var(--fg);
   background: var(--bg);
+  -webkit-font-smoothing: antialiased;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #16181d;
-    --bg-alt: #1f2229;
-    --fg: #e6e8eb;
-    --muted: #9aa1ab;
-    --border: #2d313a;
-    --accent: #3aa0e0;
-    --hover: #252a33;
+    --bg: #0f1115;
+    --surface: #171a20;
+    --surface-2: #1e222a;
+    --sidebar: #13151a;
+    --fg: #e7e9ed;
+    --muted: #9aa2ae;
+    --faint: #6b7380;
+    --border: #262a33;
+    --hover: #1f232b;
+    --accent: #5b8ff9;
+    --accent-fg: #0b1020;
+    --danger: #f06363;
+    --success: #3fcf8e;
+    --warning: #f0b04a;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.5);
+    --kind-folder: #f2b93b;
   }
 }
 
@@ -53,21 +88,59 @@ select {
 }
 
 button {
-  background: var(--bg-alt);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 4px 10px;
   cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background: var(--hover);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-fg);
+  font-weight: 500;
+}
+
+button.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 88%, black);
+}
+
+button.ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+button.icon {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
 }
 
 button.danger {
@@ -77,10 +150,16 @@ button.danger {
 input,
 textarea,
 select {
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 5px 8px;
+  padding: 6px 10px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
 }
 
 a {
@@ -92,8 +171,7 @@ a {
   display: flex;
   gap: 8px;
   align-items: center;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
   flex-wrap: wrap;
 }
 
@@ -103,4 +181,38 @@ a {
 
 .muted {
   color: var(--muted);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 20px 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  color: var(--fg);
+}
+
+.banner.warning {
+  border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+}
+
+@media (max-width: 760px) {
+  .toolbar {
+    padding: 10px 12px;
+  }
+
+  .banner {
+    margin: 0 12px 10px;
+  }
 }

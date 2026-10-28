@@ -19,6 +19,10 @@ Every view renders from IndexedDB first. The network is only used to revalidate.
 - Subscribed calendars (`cs:subscribed`) have a `ctag` but return 404 for `sync-token`.
 - Address book names vary (`importv2-1`, not `contacts`). Always discover them from the home set.
 - `contact_birthdays` is read-only.
+- The DAV root `/remote.php/dav/` only returns `current-user-principal`. `calendar-home-set`/`addressbook-home-set` exist only on the principal URL, so discovery needs two steps.
+- Sabre writes CRLF inside `address-data` as `&#13;`, so the XML parser needs `htmlEntities: true`. Hand-written fixtures with LF endings hid this.
+- `z-app-generated--contactsinteraction--recent` answers REPORT with 415. Sync it via an etag PROPFIND plus GET.
+- An empty href inside the worker resolves to the worker script itself, which shows up as a 405 on `dav.worker-*.js`.
 - Properties the server does not know come back in a separate 404 `propstat`. Only 2xx propstats count.
 
 ## v2 backlog

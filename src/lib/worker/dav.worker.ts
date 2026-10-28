@@ -9,6 +9,7 @@ import { buildVCard, parseVCard, updateVCard } from '../ical/vcard';
 import { syncCalendar, syncCollectionObjects, syncSubscription } from '../sync/calendar';
 import { revalidateFolder } from '../sync/files';
 import { uploadFile } from '../sync/upload';
+import { ConflictError, refreshDocument, saveDocument } from '../sync/documents';
 import type { ContactEntry, Reply, Request, WorkerApi } from './protocol';
 
 const client = new DavClient();
@@ -227,6 +228,18 @@ const api: WorkerApi = {
   async deleteContact(href) {
     await optimisticDelete(href);
   },
+
+  async openDocument(href, force) {
+    if (!force) await revalidateFolder(client, href.replace(/[^/]+$/, '')).catch(() => {});
+    return refreshDocument(client, href, { force });
+  },
+
+  saveDocument: (href, text, etag) => saveDocument(client, href, text, etag),
+
+  async createDocument(href, text) {
+    await client.put(href, text, /\.(md|markdown)$/i.test(href) ? 'text/markdown' : 'text/plain', null);
+    await revalidateFolder(client, href.replace(/[^/]+$/, ''));
+  },
 };
 
 self.onmessage = async (event: MessageEvent<Request>) => {
@@ -239,7 +252,7 @@ self.onmessage = async (event: MessageEvent<Request>) => {
       id,
       ok: false,
       error: e instanceof Error ? e.message : String(e),
-      status: e instanceof DavHttpError ? e.status : undefined,
+      status: e instanceof DavHttpError ? e.status : e instanceof ConflictError ? 412 : undefined,
     });
   }
 };

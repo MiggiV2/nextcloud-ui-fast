@@ -8,15 +8,17 @@ The frontend does not make Nextcloud faster. It feels fast because every view re
 - **Calendar and contacts**: `sync-collection` (RFC 6578) with `sync-token`, so after the first sync only changes are transferred. Subscribed (webcal) calendars have no sync token and are refetched only when their `ctag` changes.
 - **Web Worker**: all network traffic, XML parsing (`fast-xml-parser`), ICS/vCard parsing (`ical.js`) and recurrence expansion run in a worker. The main thread only renders.
 - **Optimistic UI**: rename, move, delete and event/contact edits are written to IndexedDB first and rolled back if the server rejects them.
-- **App shell**: a service worker caches the shell. Assets are content-hashed, served with `Cache-Control: immutable`, and pre-compressed with Brotli and gzip at build time.
+- **App shell**: the service worker precaches the shell together with every hashed asset of the same build (`scripts/sw-manifest.js` writes the list into `sw.js`), in a cache named after that build. After a deploy, the old version keeps working until the new worker takes over and reloads the page once. Assets are served with `Cache-Control: immutable` and pre-compressed with Brotli and gzip at build time.
+- **Markdown preview**: sanitized with DOMPurify before rendering, because the page shares the Nextcloud origin and session.
 
 ## Scope (v1)
 
-| Area     | Features                                                                                                         |
-| -------- | ---------------------------------------------------------------------------------------------------------------- |
-| Files    | browse, upload (chunked v2 for files > 10 MB, drag & drop), download, rename, move, delete, new folder, previews |
-| Calendar | month and week view, create/edit/delete events; recurring events are display-only                                |
-| Contacts | list, search, detail, create/edit/delete                                                                         |
+| Area     | Features                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Files    | browse, upload (chunked v2 for files > 10 MB, drag & drop), download, rename, move, delete, new folder, previews                           |
+| Calendar | month and week view, create/edit/delete events; recurring events are display-only                                                          |
+| Contacts | list, search, detail, create/edit/delete                                                                                                   |
+| Notes    | Markdown/text editor with edit, split and preview modes, Ctrl+S, conflict detection via `If-Match`, relative images from the note's folder |
 
 ## Auth
 

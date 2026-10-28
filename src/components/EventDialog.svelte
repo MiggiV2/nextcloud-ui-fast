@@ -134,10 +134,11 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: min(480px, calc(100vw - 32px));
-    background: var(--bg);
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;

@@ -1,5 +1,6 @@
 export type Route =
   | { view: 'files'; path: string }
+  | { view: 'edit'; path: string }
   | { view: 'calendar'; date: string; mode: 'month' | 'week' }
   | { view: 'contacts'; href?: string };
 
@@ -18,12 +19,20 @@ export function parseHash(hash: string): Route {
     const [date, mode] = rest;
     return { view, date: date || isoDate(new Date()), mode: mode === 'week' ? 'week' : 'month' };
   }
+  if (view === 'edit') return { view, path: decodePath(rest) };
   if (view === 'contacts') return rest.length ? { view, href: decodeURIComponent(rest.join('/')) } : { view };
-  return { view: 'files', path: rest.filter(Boolean).map(decodeURIComponent).join('/') };
+  return { view: 'files', path: decodePath(rest) };
 }
 
+const decodePath = (segments: string[]) => segments.filter(Boolean).map(decodeURIComponent).join('/');
+const encodePath = (path: string) => path.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+
 export function filesHash(path: string) {
-  return '#/files/' + path.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+  return '#/files/' + encodePath(path);
+}
+
+export function editHash(path: string) {
+  return '#/edit/' + encodePath(path);
 }
 
 export function calendarHash(date: Date, mode: 'month' | 'week') {

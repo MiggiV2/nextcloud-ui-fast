@@ -23,6 +23,12 @@ export interface FolderRow {
   syncedAt: number;
 }
 
+export interface DocumentRow {
+  href: string;
+  text: string;
+  etag: string;
+}
+
 export interface MetaRow {
   key: string;
   value: unknown;
@@ -34,6 +40,7 @@ export const db = new Dexie('nextcloud-ui-fast') as Dexie & {
   files: EntityTable<DavFile, 'href'>;
   folders: EntityTable<FolderRow, 'href'>;
   meta: EntityTable<MetaRow, 'key'>;
+  documents: EntityTable<DocumentRow, 'href'>;
 };
 
 db.version(1).stores({
@@ -43,6 +50,8 @@ db.version(1).stores({
   folders: 'href',
   meta: 'key',
 });
+
+db.version(2).stores({ documents: 'href' });
 
 export async function getMeta<T>(key: string): Promise<T | undefined> {
   return (await db.meta.get(key))?.value as T | undefined;

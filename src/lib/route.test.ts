@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filesHash, isoDate, parseHash, sabreEncode } from './route';
+import { editHash, filesHash, isoDate, parseHash, sabreEncode } from './route';
 
 describe('parseHash', () => {
   it('defaults to the files root', () => {
@@ -16,6 +16,15 @@ describe('parseHash', () => {
   it('round-trips file paths with special characters', () => {
     const path = 'Notes/a b/ä#?.md';
     expect(parseHash(filesHash(path))).toEqual({ view: 'files', path });
+  });
+
+  it('parses and round-trips editor paths', () => {
+    expect(parseHash('#/edit/Notes/Areas%20of%20Responsibility/Home.md')).toEqual({
+      view: 'edit',
+      path: 'Notes/Areas of Responsibility/Home.md',
+    });
+    const path = 'Notes/ä b/#1.md';
+    expect(parseHash(editHash(path))).toEqual({ view: 'edit', path });
   });
 
   it('parses calendar date and mode', () => {
