@@ -1,0 +1,88 @@
+name: image
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+  PUSH: ${{ github.event_name != 'pull_request' && (github.event_name != 'schedule' || github.ref == 'refs/heads/main') }}
+  FRESH: ${{ github.event_name == 'schedule' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Actions are pinned to commit SHAs: mutable tags were hijacked in the 2026 trivy-action compromise (CVE-2026-33634).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - name: dependency CVE check
+        run: npm audit --audit-level=high
+      - run: npm run lint
+      - run: npm run check
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: build image for scan
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: nextcloud-ui-fast:scan
+          no-cache: ${{ env.FRESH == 'true' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: image CVE check
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: nextcloud-ui-fast:scan
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          output-format: table
+
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        if: env.PUSH == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        if: env.PUSH == 'true'
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          no-cache: ${{ env.FRESH == 'true' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
