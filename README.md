@@ -24,12 +24,14 @@ The UI uses the Nextcloud cookie session. DAV requests carry the CSRF token from
 
 ## Development
 
+The package manager is pnpm (pinned via `packageManager`; `corepack enable` provides it).
+
 ```bash
-npm ci
-NC_URL=https://cloud.example.org npm run dev   # proxies /remote.php, /index.php, /login
-npm test                                        # needs local fixtures/, see below
-npm run check
-npm run build
+pnpm install
+NC_URL=https://cloud.example.org pnpm dev   # proxies /remote.php, /index.php, /login
+pnpm test                                   # needs local fixtures/, see below
+pnpm check
+pnpm build
 ```
 
 Because the session cookie belongs to the Nextcloud domain, log in through the dev server's proxied `/login` page.
@@ -40,7 +42,7 @@ The tests run against real DAV responses in `fixtures/`, generated with `fixues.
 
 ## Deployment
 
-The image (`ghcr.io/<owner>/nextcloud-ui-fast`) is Alpine + nginx with `brotli_static`/`gzip_static`. It listens on `:8080`, runs as a non-root user, and serves `/ui/*` with SPA fallback. There is deliberately no Go binary in the image: Caddy 2.11.7 still ships go1.26.8 with Critical CVEs. `/healthz` returns 200. The GitHub Action runs `npm audit --audit-level=high`, prettier, svelte-check, and a Grype scan of the image (fails on fixable High/Critical). It then builds `linux/amd64` and `linux/arm64` and pushes on `main` and `v*` tags. A weekly scheduled run catches newly published CVEs. All actions are pinned to commit SHAs.
+The image (`ghcr.io/<owner>/nextcloud-ui-fast`) is Alpine + nginx with `brotli_static`/`gzip_static`. It listens on `:8080`, runs as a non-root user, and serves `/ui/*` with SPA fallback. There is deliberately no Go binary in the image: Caddy 2.11.7 still ships go1.26.8 with Critical CVEs. `/healthz` returns 200. The GitHub Action runs `pnpm audit --audit-level high`, prettier, svelte-check, and a Grype scan of the image (fails on fixable High/Critical). It then builds `linux/amd64` and `linux/arm64` and pushes on `main` and `v*` tags. A weekly scheduled run catches newly published CVEs. All actions are pinned to commit SHAs.
 
 Traefik route with higher priority than the Nextcloud route:
 
