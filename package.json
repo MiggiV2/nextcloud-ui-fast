@@ -17,7 +17,7 @@
     "dompurify": "3.4.17",
     "fast-xml-parser": "^5.11.2",
     "ical.js": "^2.2.1",
-    "marked": "18.1.1"
+    "marked": "18.1.2"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
