@@ -292,8 +292,7 @@
           disabled={!loaded}
           spellcheck="true"
           placeholder={loaded ? 'Schreib los…' : 'Lädt…'}
-          aria-label="Inhalt"
-        ></textarea>
+          aria-label="Inhalt"></textarea>
       </div>
     {/if}
     {#if effectiveMode !== 'edit'}
