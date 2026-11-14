@@ -26,7 +26,7 @@ The UI uses the Nextcloud cookie session. DAV requests carry the CSRF token from
 
 ## Development
 
-The package manager is pnpm (pinned via `packageManager`; `corepack enable` provides it).
+The package manager is pnpm (pinned via `packageManager`; `corepack enable` provides it. Node 25+ no longer bundles corepack, so install it first with `npm install -g corepack`).
 
 ```bash
 pnpm install
