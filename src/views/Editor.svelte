@@ -451,6 +451,7 @@
   }
 
   .preview {
+    display: block;
     contain: paint;
     overflow-y: auto;
     padding: 18px 28px;
