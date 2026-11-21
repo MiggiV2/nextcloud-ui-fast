@@ -184,8 +184,10 @@
       <Icon name="alert" size={16} />{error}<span class="spacer"></span><button
         class="ghost icon"
         onclick={() => (error = '')}
-        aria-label="Schließen"><Icon name="x" size={16} /></button
+        aria-label="Schließen"
       >
+        <Icon name="x" size={16} />
+      </button>
     </div>
   {/if}
   {#each Object.entries(uploads) as [target, u] (target)}
@@ -218,32 +220,34 @@
                 class="name"
                 href={linkOf(file)}
                 download={!file.isDir && !isEditable(file) ? file.name : undefined}
-                title={file.name}>{file.name}</a
+                title={file.name}
               >
+                {file.name}
+              </a>
               <span class="muted size">{file.isDir && !file.size ? '—' : formatSize(file.size)}</span>
-              <span class="muted date" title={formatDateTime(file.lastModified)}
-                >{formatRelative(file.lastModified, now)}</span
-              >
+              <span class="muted date" title={formatDateTime(file.lastModified)}>
+                {formatRelative(file.lastModified, now)}
+              </span>
               <span class="actions">
                 {#if !file.isDir}
-                  <a class="action" href={file.href} download={file.name} title="Herunterladen"
-                    ><Icon name="download" size={16} /></a
-                  >
+                  <a class="action" href={file.href} download={file.name} title="Herunterladen">
+                    <Icon name="download" size={16} />
+                  </a>
                 {/if}
                 {#if file.permissions.includes('N')}
-                  <button class="ghost icon" onclick={() => rename(file)} title="Umbenennen"
-                    ><Icon name="pencil" size={16} /></button
-                  >
+                  <button class="ghost icon" onclick={() => rename(file)} title="Umbenennen">
+                    <Icon name="pencil" size={16} />
+                  </button>
                 {/if}
                 {#if file.permissions.includes('V')}
-                  <button class="ghost icon" onclick={() => move(file)} title="Verschieben"
-                    ><Icon name="move" size={16} /></button
-                  >
+                  <button class="ghost icon" onclick={() => move(file)} title="Verschieben">
+                    <Icon name="move" size={16} />
+                  </button>
                 {/if}
                 {#if file.permissions.includes('D')}
-                  <button class="ghost icon danger" onclick={() => remove(file)} title="Löschen"
-                    ><Icon name="trash" size={16} /></button
-                  >
+                  <button class="ghost icon danger" onclick={() => remove(file)} title="Löschen">
+                    <Icon name="trash" size={16} />
+                  </button>
                 {/if}
               </span>
               <span class="menu-slot"><RowMenu items={menuItems(file)} /></span>

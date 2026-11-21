@@ -39,8 +39,9 @@
           <button type="button" onclick={() => group.list.splice(i, 1)}>−</button>
         </div>
       {/each}
-      <button type="button" onclick={() => group.list.push({ type: group.types[0], value: '' })}>+ {group.label}</button
-      >
+      <button type="button" onclick={() => group.list.push({ type: group.types[0], value: '' })}>
+        + {group.label}
+      </button>
     </fieldset>
   {/each}
   <textarea placeholder="Notiz" rows="3" bind:value={note}></textarea>
