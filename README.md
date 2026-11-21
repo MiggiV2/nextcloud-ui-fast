@@ -44,7 +44,7 @@ The tests run against real DAV responses in `fixtures/`, generated with `fixues.
 
 ## Deployment
 
-The image (`ghcr.io/<owner>/nextcloud-ui-fast`) is Alpine + nginx with `brotli_static`/`gzip_static`. It listens on `:8080`, runs as a non-root user, and serves `/ui/*` with SPA fallback. There is deliberately no Go binary in the image: Caddy 2.11.7 still ships go1.26.8 with Critical CVEs. `/healthz` returns 200. The GitHub Action runs `pnpm audit --audit-level high`, prettier, svelte-check, and a Grype scan of the image (fails on fixable High/Critical). It then builds `linux/amd64` and `linux/arm64` and pushes on `main` and `v*` tags. A weekly scheduled run catches newly published CVEs. All actions are pinned to commit SHAs.
+The image (`ghcr.io/<owner>/nextcloud-ui-fast`) is Alpine + nginx with `brotli_static`/`gzip_static`. It listens on `:8080`, runs as a non-root user, and serves `/ui/*` with SPA fallback. There is deliberately no Go binary in the image: Caddy 2.11.7 still ships go1.26.8 with Critical CVEs. `/healthz` returns 200. The GitHub Action runs `pnpm audit --audit-level high`, prettier, svelte-check, and a Grype scan of the image (fails on fixable High/Critical). It then builds `linux/amd64` and `linux/arm64` and pushes on `main` and `v*` tags. A weekly scheduled run catches newly published CVEs. The `runtime` stage (`apk upgrade`) is never taken from the build cache, so a cached layer cannot hide packages that have since been fixed. All actions are pinned to commit SHAs.
 
 Traefik route with higher priority than the Nextcloud route:
 

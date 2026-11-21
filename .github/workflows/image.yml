@@ -48,6 +48,8 @@ jobs:
           load: true
           tags: nextcloud-ui-fast:scan
           no-cache: ${{ env.FRESH == 'true' }}
+          no-cache-filters: runtime
+          pull: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -86,5 +88,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           no-cache: ${{ env.FRESH == 'true' }}
+          no-cache-filters: runtime
+          pull: true
           cache-from: type=gha
           cache-to: type=gha,mode=max

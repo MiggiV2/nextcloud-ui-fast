@@ -6,7 +6,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
-FROM alpine:3.24
+FROM alpine:3.24 AS runtime
 RUN apk upgrade --no-cache \
  && apk add --no-cache nginx nginx-mod-http-brotli \
  && rm -f /etc/nginx/http.d/default.conf
